@@ -2,7 +2,9 @@ package com.moje.onlyu.data.api;
 
 import android.app.Application;
 
+import com.avos.avoscloud.okhttp.Interceptor;
 import com.avos.avoscloud.okhttp.OkHttpClient;
+import com.facebook.stetho.okhttp.StethoInterceptor;
 
 import java.util.concurrent.TimeUnit;
 
@@ -26,6 +28,7 @@ public class ApiServiceModule {
     @Singleton
     OkHttpClient provideOkHttpClient() {
         OkHttpClient okHttpClient = new OkHttpClient();
+        okHttpClient.networkInterceptors().add((Interceptor) new StethoInterceptor());
         okHttpClient.setConnectTimeout(CONN_TIME_OUT, TimeUnit.MILLISECONDS);
         okHttpClient.setReadTimeout(READ_TIME_OUT, TimeUnit.MILLISECONDS);
         return okHttpClient;
