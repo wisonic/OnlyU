@@ -43,7 +43,7 @@ public class MainActivity extends BaseActivity {
         activityMainTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                SystemClock.sleep(20000);
+                SystemClock.sleep(20000);
 //                new Thread(new Runnable() {
 //                    @Override
 //                    public void run() {
