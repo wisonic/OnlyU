@@ -1,7 +1,10 @@
 package com.moje.onlyu.ui.activity;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Message;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -20,12 +23,23 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
+import java.io.File;
 import java.io.IOException;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import rx.Observable;
+import rx.Observer;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action;
+import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.observables.AsyncOnSubscribe;
+import rx.observables.SyncOnSubscribe;
+import rx.schedulers.Schedulers;
 
 public class MainActivity extends BaseActivity {
 
@@ -94,4 +108,135 @@ public class MainActivity extends BaseActivity {
         }
 
     }
+
+    private void rxTest(){
+        Integer[] intArray = new Integer[]{1,2,3,4,5};
+        File[] folders = new File[3];
+        Observable.from(folders)
+                .flatMap(new Func1<File, Observable<File>>() {
+                    @Override
+                    public Observable<File> call(File file) {
+                        return Observable.from(file.listFiles());
+                    }
+                })
+        .filter(new Func1<File, Boolean>() {
+            @Override
+            public Boolean call(File file) {
+                return file.getName().endsWith("png");
+            }
+        })
+        .map(new Func1<File, Bitmap>() {
+            @Override
+            public Bitmap call(File file) {
+                return BitmapFactory.decodeFile(file.getName(),null);
+            }
+        })
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Action1<Bitmap>() {
+            @Override
+            public void call(Bitmap bitmap) {
+                //Refresh UI
+            }
+        });
+    }
+
+    Observer<String> observer = new Observer<String>(){
+        @Override
+        public void onCompleted() {
+
+        }
+
+        @Override
+        public void onError(Throwable e) {
+
+        }
+
+        @Override
+        public void onNext(String s) {
+
+        }
+    };
+
+    Subscriber<String> subscriber = new Subscriber<String>() {
+        @Override
+        public void onCompleted() {
+
+        }
+
+        @Override
+        public void onError(Throwable e) {
+
+        }
+
+        @Override
+        public void onNext(String s) {
+
+        }
+    };
+
+    Observable syncObservable = Observable.create(new SyncOnSubscribe() {
+        @Override
+        protected Object generateState() {
+            return null;
+        }
+
+        @Override
+        protected Object next(Object state, Observer observer) {
+            return null;
+        }
+
+        @Override
+        public void call(Object o) {
+
+        }
+    });
+
+    Observable asyncObservable = Observable.create(new AsyncOnSubscribe() {
+        @Override
+        protected Object generateState() {
+            return null;
+        }
+
+        @Override
+        protected Object next(Object state, long requested, Observer observer) {
+            return null;
+        }
+
+        @Override
+        public void call(Object o) {
+
+        }
+    });
+
+    Observable observable = Observable.create(new Observable.OnSubscribe<String>() {
+        @Override
+        public void call(Subscriber<? super String> subscriber) {
+            subscriber.onNext("");
+        }
+    });
+
+    String[] words = {"Hello", "Hi", "Aloha"};
+
+    Observable justObservable = Observable.just("1","2","3");
+
+    private void testSub(){
+        observable.subscribe(observer);
+        observable.subscribe(subscriber);
+
+        observable.flatMap(new Func1<String, Observable<Message>>() {
+            @Override
+            public Observable<Message> call(String o) {
+                return null;
+            }
+        });
+    }
+
+    Action1<String> onNextAction = new Action1<String>() {
+        @Override
+        public void call(String s) {
+
+        }
+    };
+
 }
