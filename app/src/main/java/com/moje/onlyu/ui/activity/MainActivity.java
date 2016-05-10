@@ -11,14 +11,17 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.avos.avoscloud.okhttp.Interceptor;
+import com.facebook.stetho.common.LogRedirector;
 import com.facebook.stetho.okhttp.StethoInterceptor;
 import com.moje.onlyu.AppComponent;
 import com.moje.onlyu.R;
 import com.moje.onlyu.ui.activity.component.DaggerMainActivityComponent;
 import com.moje.onlyu.ui.activity.module.MainActivityModule;
 import com.moje.onlyu.ui.activity.presenter.MainActivityPresenter;
+import com.orhanobut.logger.Logger;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -54,10 +57,12 @@ public class MainActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.inject(this);
+        activityMainTv.setOnClickListener(v -> Toast.makeText(getApplicationContext(), "Lambda", Toast.LENGTH_LONG).show());
         activityMainTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SystemClock.sleep(20000);
+                Logger.d("Logger Test");
+//                SystemClock.sleep(20000);
 //                new Thread(new Runnable() {
 //                    @Override
 //                    public void run() {
@@ -75,7 +80,8 @@ public class MainActivity extends BaseActivity {
         // class MainActivity. If the activity gets destroyed before the task finishes (e.g. rotation),
         // the activity instance will leak.
         new AsyncTask<Void, Void, Void>() {
-            @Override protected Void doInBackground(Void... params) {
+            @Override
+            protected Void doInBackground(Void... params) {
                 // Do some slow work in background
                 SystemClock.sleep(20000);
                 return null;
@@ -109,8 +115,8 @@ public class MainActivity extends BaseActivity {
 
     }
 
-    private void rxTest(){
-        Integer[] intArray = new Integer[]{1,2,3,4,5};
+    private void rxTest() {
+        Integer[] intArray = new Integer[]{1, 2, 3, 4, 5};
         File[] folders = new File[3];
         Observable.from(folders)
                 .flatMap(new Func1<File, Observable<File>>() {
@@ -119,29 +125,29 @@ public class MainActivity extends BaseActivity {
                         return Observable.from(file.listFiles());
                     }
                 })
-        .filter(new Func1<File, Boolean>() {
-            @Override
-            public Boolean call(File file) {
-                return file.getName().endsWith("png");
-            }
-        })
-        .map(new Func1<File, Bitmap>() {
-            @Override
-            public Bitmap call(File file) {
-                return BitmapFactory.decodeFile(file.getName(),null);
-            }
-        })
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Action1<Bitmap>() {
-            @Override
-            public void call(Bitmap bitmap) {
-                //Refresh UI
-            }
-        });
+                .filter(new Func1<File, Boolean>() {
+                    @Override
+                    public Boolean call(File file) {
+                        return file.getName().endsWith("png");
+                    }
+                })
+                .map(new Func1<File, Bitmap>() {
+                    @Override
+                    public Bitmap call(File file) {
+                        return BitmapFactory.decodeFile(file.getName(), null);
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Bitmap>() {
+                    @Override
+                    public void call(Bitmap bitmap) {
+                        //Refresh UI
+                    }
+                });
     }
 
-    Observer<String> observer = new Observer<String>(){
+    Observer<String> observer = new Observer<String>() {
         @Override
         public void onCompleted() {
 
@@ -218,9 +224,9 @@ public class MainActivity extends BaseActivity {
 
     String[] words = {"Hello", "Hi", "Aloha"};
 
-    Observable justObservable = Observable.just("1","2","3");
+    Observable justObservable = Observable.just("1", "2", "3");
 
-    private void testSub(){
+    private void testSub() {
         observable.subscribe(observer);
         observable.subscribe(subscriber);
 
@@ -235,7 +241,6 @@ public class MainActivity extends BaseActivity {
     Action1<String> onNextAction = new Action1<String>() {
         @Override
         public void call(String s) {
-
         }
     };
 

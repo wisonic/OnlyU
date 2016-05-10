@@ -6,6 +6,8 @@ import android.content.Context;
 import com.facebook.stetho.Stetho;
 import com.github.moduth.blockcanary.BlockCanary;
 import com.moje.onlyu.data.api.ApiServiceModule;
+import com.orhanobut.logger.LogLevel;
+import com.orhanobut.logger.Logger;
 import com.squareup.leakcanary.LeakCanary;
 
 /**
@@ -14,6 +16,8 @@ import com.squareup.leakcanary.LeakCanary;
 public class GApplication extends Application {
     private static Context sContext;
     private AppComponent appComponent;
+
+    private String LOG_TAG = "OnlyU";
 
     public static GApplication get(Context context) {
         return (GApplication) context.getApplicationContext();
@@ -32,6 +36,10 @@ public class GApplication extends Application {
         BlockCanary.install(this, new AppBlockCanaryContext()).start();
         //监控内存泄漏
         LeakCanary.install(this);
+
+        Logger.init(LOG_TAG).setMethodCount(2).hideThreadInfo().setLogLevel(BuildConfig.DEBUG ? LogLevel.FULL : LogLevel.NONE).setMethodOffset(2);              // default 0
+//                .logTool(new AndroidLogTool()); // custom log tool, optional
+
     }
 
     public static Context getAppContext() {
