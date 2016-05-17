@@ -2,9 +2,8 @@ package com.moje.onlyu.data.api;
 
 import android.app.Application;
 
-import com.avos.avoscloud.okhttp.Interceptor;
-import com.avos.avoscloud.okhttp.OkHttpClient;
-import com.facebook.stetho.okhttp.StethoInterceptor;
+import com.facebook.stetho.okhttp3.BuildConfig;
+import com.facebook.stetho.okhttp3.StethoInterceptor;
 
 import java.util.concurrent.TimeUnit;
 
@@ -12,8 +11,10 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
-import retrofit.RestAdapter;
-import retrofit.client.OkClient;
+import okhttp3.OkHttpClient;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Created by Administrator on 2016/4/26.
@@ -28,23 +29,29 @@ public class ApiServiceModule {
     @Singleton
     OkHttpClient provideOkHttpClient() {
         OkHttpClient okHttpClient = new OkHttpClient();
-        okHttpClient.networkInterceptors().add((Interceptor) new StethoInterceptor());
-        okHttpClient.setConnectTimeout(CONN_TIME_OUT, TimeUnit.MILLISECONDS);
-        okHttpClient.setReadTimeout(READ_TIME_OUT, TimeUnit.MILLISECONDS);
+        if (BuildConfig.DEBUG) {
+            okHttpClient.networkInterceptors().add( new StethoInterceptor());
+        }
+//        okHttpClient.setConnectTimeout(CONN_TIME_OUT, TimeUnit.MILLISECONDS);
+//        okHttpClient.setReadTimeout(READ_TIME_OUT, TimeUnit.MILLISECONDS);
         return okHttpClient;
     }
 
     @Provides
     @Singleton
-    RestAdapter provideRestAdapter(Application application, OkHttpClient okHttpClient) {
-        RestAdapter.Builder builder = new RestAdapter.Builder();
-        builder.setClient(new OkClient()).setEndpoint(ENDPOINT);
-        return builder.build();
+    Retrofit  provideRestAdapter(Application application, OkHttpClient okHttpClient) {
+        Retrofit retrofit = new Retrofit.Builder()
+//                .baseUrl(AppConfig.BASE_URL)
+                .client(okHttpClient)
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        return retrofit;
     }
 
     @Provides
     @Singleton
-    ApiService provideApiService(RestAdapter restAdapter){
+    ApiService provideApiService(Retrofit  restAdapter) {
         return restAdapter.create(ApiService.class);
     }
 }
