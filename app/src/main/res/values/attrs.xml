@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="IWTopTitleView">
+        <!-- Text to display for title. -->
+        <attr name="titleview_title_text" format="string" localization="suggested" />
+        <attr name="bg_color" format="reference|color" />
+        <attr name="back_btn_bg" format="reference" />
+        <attr name="hasLeft" format="boolean" />
+        <attr name="hasCancel" format="boolean" />
+        <attr name="hasDivider" format="boolean" />
+        <attr name="isDark" format="boolean" />
+    </declare-styleable>
+</resources>

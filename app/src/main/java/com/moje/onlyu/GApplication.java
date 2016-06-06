@@ -2,6 +2,7 @@ package com.moje.onlyu;
 
 import android.app.Application;
 import android.content.Context;
+import android.graphics.Typeface;
 
 import com.facebook.stetho.Stetho;
 import com.github.moduth.blockcanary.BlockCanary;
@@ -16,6 +17,10 @@ import com.squareup.leakcanary.LeakCanary;
 public class GApplication extends Application {
     private static Context sContext;
     private AppComponent appComponent;
+    private static GApplication application = null;
+
+    public static int statusBarHeight = 0;
+    public static boolean isMIUIv6 = true;
 
     private String LOG_TAG = "OnlyU";
 
@@ -23,10 +28,15 @@ public class GApplication extends Application {
         return (GApplication) context.getApplicationContext();
     }
 
+    public static GApplication getInstance() {
+        return application;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
         sContext = this;
+        application = this;
         appComponent = DaggerAppComponent.builder()
                 .appModule(new AppModule(this))
                 .apiServiceModule(new ApiServiceModule()).build();
@@ -40,6 +50,16 @@ public class GApplication extends Application {
         Logger.init(LOG_TAG).setMethodCount(2).hideThreadInfo().setLogLevel(BuildConfig.DEBUG ? LogLevel.FULL : LogLevel.NONE).setMethodOffset(2);              // default 0
 //                .logTool(new AndroidLogTool()); // custom log tool, optional
 
+    }
+
+    private Typeface iconfont;
+    private final static String fontPath = "iconfont/iconfont.ttf";
+
+    public Typeface getIconfont() {
+        if (iconfont == null) {
+            iconfont = Typeface.createFromAsset(sContext.getAssets(), fontPath);
+        }
+        return iconfont;
     }
 
     public static Context getAppContext() {

@@ -1,26 +1,30 @@
 package com.moje.onlyu.ui.activity;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.SystemClock;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.facebook.stetho.okhttp.StethoInterceptor;
+import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.moje.onlyu.AppComponent;
 import com.moje.onlyu.R;
 import com.moje.onlyu.ui.activity.component.DaggerMainActivityComponent;
 import com.moje.onlyu.ui.activity.module.MainActivityModule;
 import com.moje.onlyu.ui.activity.presenter.MainActivityPresenter;
+import com.moje.onlyu.utils.ImmersiveFullScreenUtils;
+import com.moje.onlyu.widget.TextViewTF;
 import com.orhanobut.logger.Logger;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +34,9 @@ import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import rx.Observable;
 import rx.Observer;
 import rx.Subscriber;
@@ -42,23 +49,44 @@ import rx.schedulers.Schedulers;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends Activity {
+
+    public int titleViewHeight = -1;
+    boolean blackForMIUI = false;
+    boolean showSystemBarTint = true;
 
     @InjectView(R.id.activity_main_tv)
     Button activityMainTv;
 
     @Inject
     MainActivityPresenter presenter;
+    @InjectView(R.id.center_txt)
+    TextView centerTxt;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ImmersiveFullScreenUtils.initSystemBar(this);
         ButterKnife.inject(this);
+
+        TextViewTF noDisturbIcon = new TextViewTF(this);
+        noDisturbIcon.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
+        noDisturbIcon.setText(R.string.chat_nodisturb);
+
+        noDisturbIcon.layout(0, 0, 40, 40);
+        noDisturbIcon.buildDrawingCache();
+        Drawable drawable = new BitmapDrawable(noDisturbIcon.getDrawingCache());
+
+        drawable.setBounds(0, 0, 40, 40);
+        centerTxt.setCompoundDrawables(null, null, drawable, null);
+
+
         activityMainTv.setOnClickListener(v -> {
             Logger.d("Logger Test");
-            Toast.makeText(getApplicationContext(), "Lambda", Toast.LENGTH_LONG).show();
-            rxTest();
+            startActivity(new Intent(MainActivity.this, Main2Activity.class));
+//            Toast.makeText(getApplicationContext(), "Lambda", Toast.LENGTH_LONG).show();
+//            rxTest();
         });
 //        activityMainTv.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -75,7 +103,43 @@ public class MainActivity extends BaseActivity {
 ////                startAsyncTask();
 //            }
 //        });
-        presenter.showUserName();
+//        presenter.showUserName();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (showSystemBarTint) {
+            titleViewHeight = ImmersiveFullScreenUtils.uiSystemBarTint(this, getWindow().getDecorView());
+        }
+        if (!blackForMIUI) {
+            //CommonUtil.miDarkSystemBar(this);
+        }
+    }
+
+    public void setBlackForMIUI(boolean blackForMIUI) {
+        this.blackForMIUI = blackForMIUI;
+    }
+
+    public void setShowSystemBarTint(boolean showSystemBarTint) {
+        this.showSystemBarTint = showSystemBarTint;
+    }
+
+    @Override
+    protected void onResume() {
+        Logger.d("onResume");
+        super.onResume();
+    }
+
+    /**
+     * 将sp值转换为px值，保证文字大小不变
+     *
+     * @param spValue （DisplayMetrics类中属性scaledDensity）
+     * @return
+     */
+    public static int sp2px(Context context, float spValue) {
+        final float fontScale = context.getResources().getDisplayMetrics().scaledDensity;
+        return (int) (spValue * fontScale + 0.5f);
     }
 
     void startAsyncTask() {
@@ -92,10 +156,10 @@ public class MainActivity extends BaseActivity {
         }.execute();
     }
 
-    @Override
-    protected void setupActivityComponent(AppComponent appComponent) {
-        DaggerMainActivityComponent.builder().appComponent(appComponent).mainActivityModule(new MainActivityModule(this)).build().inject(this);
-    }
+//    @Override
+//    protected void setupActivityComponent(AppComponent appComponent) {
+//        DaggerMainActivityComponent.builder().appComponent(appComponent).mainActivityModule(new MainActivityModule(this)).build().inject(this);
+//    }
 
     public void initView(String userName) {
         activityMainTv.setText(userName);
@@ -118,14 +182,14 @@ public class MainActivity extends BaseActivity {
 
     }
 
-    private void rxTest(){
+    private void rxTest() {
         Observable.interval(1, TimeUnit.SECONDS)
-                .debounce(300,TimeUnit.MILLISECONDS)
-                .throttleFirst(300,TimeUnit.MILLISECONDS)
+                .debounce(300, TimeUnit.MILLISECONDS)
+                .throttleFirst(300, TimeUnit.MILLISECONDS)
                 .subscribe(new Observer<Long>() {
                     @Override
                     public void onCompleted() {
-                        Logger.d ("completed");
+                        Logger.d("completed");
                     }
 
                     @Override
@@ -135,7 +199,7 @@ public class MainActivity extends BaseActivity {
 
                     @Override
                     public void onNext(Long number) {
-                        Logger.d ("hello world");
+                        Logger.d("hello world");
                     }
                 });
 
@@ -150,7 +214,7 @@ public class MainActivity extends BaseActivity {
                 .flatMap(new Func1<File, Observable<File>>() {
                     @Override
                     public Observable<File> call(File file) {
-                        if(null!=file) {
+                        if (null != file) {
                             return Observable.from(file.listFiles());
                         } else {
                             return null;
@@ -160,9 +224,9 @@ public class MainActivity extends BaseActivity {
                 .filter(new Func1<File, Boolean>() {
                     @Override
                     public Boolean call(File file) {
-                        if(null!=file) {
+                        if (null != file) {
                             return file.getName().endsWith("png");
-                        }else{
+                        } else {
                             return false;
                         }
                     }
@@ -170,7 +234,7 @@ public class MainActivity extends BaseActivity {
                 .map(new Func1<File, Bitmap>() {
                     @Override
                     public Bitmap call(File file) {
-                        if(null!=file) {
+                        if (null != file) {
                             return BitmapFactory.decodeFile(file.getName(), null);
                         }
                         return null;
