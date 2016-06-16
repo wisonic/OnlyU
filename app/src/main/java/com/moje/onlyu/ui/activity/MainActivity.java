@@ -22,6 +22,7 @@ import com.moje.onlyu.R;
 import com.moje.onlyu.ui.activity.component.DaggerMainActivityComponent;
 import com.moje.onlyu.ui.activity.module.MainActivityModule;
 import com.moje.onlyu.ui.activity.presenter.MainActivityPresenter;
+import com.moje.onlyu.utils.DoubleCountDemo;
 import com.moje.onlyu.utils.ImmersiveFullScreenUtils;
 import com.moje.onlyu.widget.TextViewTF;
 import com.orhanobut.logger.Logger;
@@ -84,7 +85,8 @@ public class MainActivity extends Activity {
 
         activityMainTv.setOnClickListener(v -> {
             Logger.d("Logger Test");
-            startActivity(new Intent(MainActivity.this, Main2Activity.class));
+            new DoubleCountDemo().start();
+//            startActivity(new Intent(MainActivity.this, Main2Activity.class));
 //            Toast.makeText(getApplicationContext(), "Lambda", Toast.LENGTH_LONG).show();
 //            rxTest();
         });
