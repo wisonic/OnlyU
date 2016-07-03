@@ -35,7 +35,7 @@
     
     <Button
         android:id="@+id/jump"
-        android:text="Go"
+        android:text="GoA"
         android:visibility="gone"
         android:layout_centerInParent="true"
         android:layout_width="wrap_content"
