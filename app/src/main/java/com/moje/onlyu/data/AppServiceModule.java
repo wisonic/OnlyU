@@ -14,6 +14,7 @@ public class AppServiceModule {
     @Provides
     User provideUser(){
         User user = new User();
+        user.setId("9587");
         user.setName("Grant");
         return user;
     }
